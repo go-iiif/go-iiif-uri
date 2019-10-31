@@ -3,7 +3,34 @@ package uri
 import (
 	"github.com/aaronland/go-string/dsn"
 	"github.com/aaronland/go-string/random"
+	"net/url"
 )
+
+func init() {
+	dr := NewIdSecretURIDriver()
+	RegisterDriver("idsecret", dr)
+}
+
+type IdSecretURIDriver struct {
+	Driver
+}
+
+func NewIdSecretURIDriver() Driver {
+
+	dr := IdSecretURIDriver{}
+	return &dr
+}
+
+func (dr *IdSecretURIDriver) NewURI(str_uri string) (URI, error) {
+
+	u, err := url.Parse(str_uri)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return NewIdSecretURI(u.Path)
+}
 
 type IdSecretURI struct {
 	URI
@@ -11,6 +38,9 @@ type IdSecretURI struct {
 }
 
 func NewIdSecretURI(raw string) (URI, error) {
+
+	// id is the source URI
+	// uri is the target (new) URI
 
 	dsn_map, err := dsn.StringToDSNWithKeys(raw, "id", "uri")
 
