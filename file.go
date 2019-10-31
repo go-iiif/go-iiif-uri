@@ -2,9 +2,7 @@ package uri
 
 import (
 	"fmt"
-	_ "log"
 	"net/url"
-	_ "path/filepath"
 )
 
 const FileDriverName string = "file"
@@ -15,7 +13,8 @@ type FileURIDriver struct {
 
 type FileURI struct {
 	URI
-	path string
+	origin string
+	target string
 }
 
 func init() {
@@ -41,24 +40,45 @@ func NewFileURI(str_uri string) (URI, error) {
 		return nil, err
 	}
 
-	// path := filepath.Base(u.Path)
-	path := u.Path
+	origin := u.Path
+
+	q := u.Query()
+
+	target := q.Get("target")
+
+	if target == "" {
+		target = origin
+	}
 
 	f_u := FileURI{
-		path: path,
+		origin: origin,
+		target: target,
 	}
 
 	return &f_u, nil
 }
 
-func (u *FileURI) Base() string {
-	return u.path
+func (u *FileURI) Driver() string {
+	return FileDriverName
 }
 
-func (u *FileURI) Root() string {
-	return ""
+func (u *FileURI) Origin() string {
+	return u.origin
+}
+
+func (u *FileURI) Target(opts *url.Values) (string, error) {
+	return u.target, nil
 }
 
 func (u *FileURI) String() string {
-	return fmt.Sprintf("%s://%s", FileDriverName, u.path)
+
+	str_uri := fmt.Sprintf("%s://%s", u.Driver(), u.origin)
+
+	if u.target != "" && u.target != u.origin {
+		q := url.Values{}
+		q.Set("target", u.target)
+		str_uri = fmt.Sprintf("%s?%s", str_uri, q.Encode())
+	}
+
+	return str_uri
 }

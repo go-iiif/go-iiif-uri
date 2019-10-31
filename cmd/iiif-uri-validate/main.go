@@ -20,6 +20,13 @@ func main() {
 			log.Fatal(msg)
 		}
 
-		log.Printf("OK '%s' %s %s\n", u.String(), u.Root(), u.Base())
+		origin := u.Origin()
+		target, err := u.Target(nil)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		log.Printf("OK '%s' %s %s\n", u.String(), origin, target)
 	}
 }

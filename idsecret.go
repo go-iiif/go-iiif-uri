@@ -28,7 +28,7 @@ func NewIdSecretURIDriver() Driver {
 	return &dr
 }
 
-// idsecret://{SOURCE}?id={ID}&secret={SECRET}
+// idsecret://{ORIGIN}?id={ID}&secret={SECRET}
 
 func (dr *IdSecretURIDriver) NewURI(str_uri string) (URI, error) {
 
@@ -37,7 +37,7 @@ func (dr *IdSecretURIDriver) NewURI(str_uri string) (URI, error) {
 
 type IdSecretURI struct {
 	URI
-	source   string
+	origin   string
 	id       int64
 	secret   string
 	secret_o string
@@ -51,7 +51,7 @@ func NewIdSecretURIFromDSN(dsn_raw string) (URI, error) {
 		return nil, err
 	}
 
-	source := dsn_map["id"]
+	origin := dsn_map["id"]
 	id := dsn_map["uri"]
 
 	q := url.Values{}
@@ -69,7 +69,7 @@ func NewIdSecretURIFromDSN(dsn_raw string) (URI, error) {
 		q.Set("secret_o", secret_o)
 	}
 
-	uri_str := fmt.Sprintf("%s://%s?%s", IdSecretDriverName, source, q.Encode())
+	uri_str := fmt.Sprintf("%s://%s?%s", IdSecretDriverName, origin, q.Encode())
 	return NewIdSecretURI(uri_str)
 }
 
@@ -81,7 +81,7 @@ func NewIdSecretURI(str_uri string) (URI, error) {
 		return nil, err
 	}
 
-	source := u.Path
+	origin := u.Path
 
 	q := u.Query()
 
@@ -126,7 +126,7 @@ func NewIdSecretURI(str_uri string) (URI, error) {
 	}
 
 	id_u := IdSecretURI{
-		source:   source,
+		origin:   origin,
 		id:       id,
 		secret:   secret,
 		secret_o: secret_o,
@@ -135,12 +135,49 @@ func NewIdSecretURI(str_uri string) (URI, error) {
 	return &id_u, nil
 }
 
-func (u *IdSecretURI) Root() string {
-	return id2Path(u.id)
+func (u *IdSecretURI) Driver() string {
+	return IdSecretDriverName
 }
 
-func (u *IdSecretURI) Base() string {
-	return strconv.FormatInt(u.id, 10)
+func (u *IdSecretURI) Target(opts *url.Values) (string, error) {
+
+	str_id := strconv.FormatInt(u.id, 10)
+
+	tree := id2Path(u.id)
+	root := filepath.Join(tree, str_id)
+
+	uri := root
+
+	if opts != nil {
+
+		format := opts.Get("format")
+		label := opts.Get("label")
+		original := opts.Get("original")
+
+		if format == "" {
+			return "", errors.New("Missing format parameter")
+		}
+
+		if label == "" {
+			return "", errors.New("Missing label parameter")
+		}
+
+		secret := u.secret
+
+		if original != "" {
+			secret = u.secret_o
+		}
+
+		fname := fmt.Sprintf("%s_%s_%s.%s", str_id, secret, label, format)
+
+		uri = filepath.Join(root, fname)
+	}
+
+	return uri, nil
+}
+
+func (u *IdSecretURI) Origin() string {
+	return u.origin
 }
 
 func (u *IdSecretURI) String() string {
@@ -150,12 +187,12 @@ func (u *IdSecretURI) String() string {
 	q.Set("secret", u.secret)
 	q.Set("secret_o", u.secret_o)
 
-	return fmt.Sprintf("%s://%s?%s", IdSecretDriverName, u.source, q.Encode())
+	return fmt.Sprintf("%s://%s?%s", u.Driver(), u.origin, q.Encode())
 }
 
 func id2Path(id int64) string {
 
-	parts := []string{}
+	parts := []string{""}
 	input := strconv.FormatInt(id, 10)
 
 	for len(input) > 3 {

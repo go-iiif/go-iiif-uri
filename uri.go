@@ -1,12 +1,14 @@
 package uri
 
 import (
+	"net/url"
 )
 
 type URI interface {
+	Driver() string
 	String() string
-	Base() string
-	Root() string
+	Origin() string
+	Target(*url.Values) (string, error)
 }
 
 func NewURI(str_uri string) (URI, error) {
