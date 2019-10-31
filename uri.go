@@ -3,11 +3,18 @@ package uri
 import (
 	"fmt"
 	_ "log"
+	"path/filepath"
 )
 
 type URI interface {
-	URL() string
 	String() string
+	// URL() string
+	Base() string
+	Root() string
+}
+
+func Path(u URI) string {
+	return filepath.Join(u.Root(), u.Base())
 }
 
 // DEPRECATED (20191031/thisisaaronland)

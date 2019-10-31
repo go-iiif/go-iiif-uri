@@ -7,6 +7,8 @@ import (
 	"github.com/aaronland/go-string/random"
 	_ "log"
 	"net/url"
+	"path/filepath"
+	"strconv"
 )
 
 const IdSecretDriverName string = "idsecret"
@@ -36,7 +38,7 @@ func (dr *IdSecretURIDriver) NewURI(str_uri string) (URI, error) {
 type IdSecretURI struct {
 	URI
 	source   string
-	id       string
+	id       int64
 	secret   string
 	secret_o string
 }
@@ -83,10 +85,16 @@ func NewIdSecretURI(str_uri string) (URI, error) {
 
 	q := u.Query()
 
-	id := q.Get("id")
+	str_id := q.Get("id")
 
-	if id == "" {
+	if str_id == "" {
 		return nil, errors.New("Missing id")
+	}
+
+	id, err := strconv.ParseInt(str_id, 10, 64)
+
+	if err != nil {
+		return nil, err
 	}
 
 	secret := q.Get("secret")
@@ -127,16 +135,39 @@ func NewIdSecretURI(str_uri string) (URI, error) {
 	return &id_u, nil
 }
 
-func (u *IdSecretURI) URL() string {
-	return u.id
+func (u *IdSecretURI) Root() string {
+	return id2Path(u.id)
+}
+
+func (u *IdSecretURI) Base() string {
+	return strconv.FormatInt(u.id, 10)
 }
 
 func (u *IdSecretURI) String() string {
 
 	q := url.Values{}
-	q.Set("id", u.id)
+	q.Set("id", strconv.FormatInt(u.id, 10))
 	q.Set("secret", u.secret)
 	q.Set("secret_o", u.secret_o)
 
 	return fmt.Sprintf("%s://%s?%s", IdSecretDriverName, u.source, q.Encode())
+}
+
+func id2Path(id int64) string {
+
+	parts := []string{}
+	input := strconv.FormatInt(id, 10)
+
+	for len(input) > 3 {
+
+		chunk := input[0:3]
+		input = input[3:]
+		parts = append(parts, chunk)
+	}
+
+	if len(input) > 0 {
+		parts = append(parts, input)
+	}
+
+	return filepath.Join(parts...)
 }
