@@ -4,10 +4,13 @@ import (
 	"net/url"
 )
 
+const StringDriverName string = "string"
+const FileDriverName string = "file"
+
 func init() {
 	dr := NewStringURIDriver()
-	RegisterDriver("string", dr)
-	RegisterDriver("file", dr)
+	RegisterDriver(StringDriverName, dr)
+	RegisterDriver(FileDriverName, dr)
 }
 
 type StringURIDriver struct {

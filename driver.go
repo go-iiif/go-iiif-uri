@@ -2,6 +2,7 @@ package uri
 
 import (
 	"errors"
+	"log"
 	"net/url"
 	"sort"
 	"strings"
@@ -37,6 +38,7 @@ func NewURI(str_uri string) (URI, error) {
 		return nil, errors.New("Unknown driver")
 	}
 
+	log.Printf("%T %s\n", driver, str_uri)
 	return driver.NewURI(str_uri)
 }
 
@@ -81,5 +83,5 @@ func Drivers() []string {
 }
 
 func normalizeDriverName(name string) string {
-	return strings.ToUpper(name)
+	return strings.ToLower(name)
 }

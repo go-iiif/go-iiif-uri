@@ -9,19 +9,17 @@ import (
 
 func main() {
 
-	var uri_type = flag.String("type", "string", "...")
-
 	flag.Parse()
 
 	for _, str_uri := range flag.Args() {
 
-		u, err := uri.NewURIWithType(str_uri, *uri_type)
+		u, err := uri.NewURI(str_uri)
 
 		if err != nil {
 			msg := fmt.Sprintf("Invalid URI (%s) %s", str_uri, err)
 			log.Fatal(msg)
 		}
 
-		log.Printf("%s OK\n", u.String())
+		log.Printf("OK '%s' %s\n", u.String(), u.URL())
 	}
 }

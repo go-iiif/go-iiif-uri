@@ -1,14 +1,19 @@
 package uri
 
 import (
+	"errors"
+	"fmt"
 	"github.com/aaronland/go-string/dsn"
 	"github.com/aaronland/go-string/random"
+	_ "log"
 	"net/url"
 )
 
+const IdSecretDriverName string = "idsecret"
+
 func init() {
 	dr := NewIdSecretURIDriver()
-	RegisterDriver("idsecret", dr)
+	RegisterDriver(IdSecretDriverName, dr)
 }
 
 type IdSecretURIDriver struct {
@@ -21,7 +26,52 @@ func NewIdSecretURIDriver() Driver {
 	return &dr
 }
 
+// idsecret://{SOURCE}?id={ID}&secret={SECRET}
+
 func (dr *IdSecretURIDriver) NewURI(str_uri string) (URI, error) {
+
+	return NewIdSecretURI(str_uri)
+}
+
+type IdSecretURI struct {
+	URI
+	source   string
+	id       string
+	secret   string
+	secret_o string
+}
+
+func NewIdSecretURIFromDSN(dsn_raw string) (URI, error) {
+
+	dsn_map, err := dsn.StringToDSNWithKeys(dsn_raw, "id", "uri")
+
+	if err != nil {
+		return nil, err
+	}
+
+	source := dsn_map["id"]
+	id := dsn_map["uri"]
+
+	q := url.Values{}
+	q.Set("id", id)
+
+	secret, ok := dsn_map["secret"]
+
+	if ok {
+		q.Set("secret", secret)
+	}
+
+	secret_o, ok := dsn_map["secret_o"]
+
+	if ok {
+		q.Set("secret_o", secret_o)
+	}
+
+	uri_str := fmt.Sprintf("%s://%s?%s", IdSecretDriverName, source, q.Encode())
+	return NewIdSecretURI(uri_str)
+}
+
+func NewIdSecretURI(str_uri string) (URI, error) {
 
 	u, err := url.Parse(str_uri)
 
@@ -29,66 +79,64 @@ func (dr *IdSecretURIDriver) NewURI(str_uri string) (URI, error) {
 		return nil, err
 	}
 
-	return NewIdSecretURI(u.Path)
-}
+	source := u.Path
 
-type IdSecretURI struct {
-	URI
-	dsn_map dsn.DSN
-}
+	q := u.Query()
 
-func NewIdSecretURI(raw string) (URI, error) {
+	id := q.Get("id")
 
-	// id is the source URI
-	// uri is the target (new) URI
-
-	dsn_map, err := dsn.StringToDSNWithKeys(raw, "id", "uri")
-
-	if err != nil {
-		return nil, err
+	if id == "" {
+		return nil, errors.New("Missing id")
 	}
 
-	opts := random.DefaultOptions()
-	opts.AlphaNumeric = true
+	secret := q.Get("secret")
+	secret_o := q.Get("secret_o")
 
-	_, ok := dsn_map["secret"]
+	rnd_opts := random.DefaultOptions()
+	rnd_opts.AlphaNumeric = true
 
-	if !ok {
+	if secret == "" {
 
-		s, err := random.String(opts)
+		s, err := random.String(rnd_opts)
 
 		if err != nil {
 			return nil, err
 		}
 
-		dsn_map["secret"] = s
+		secret = s
 	}
 
-	_, ok = dsn_map["secret_o"]
+	if secret_o == "" {
 
-	if !ok {
-
-		s, err := random.String(opts)
+		s, err := random.String(rnd_opts)
 
 		if err != nil {
 			return nil, err
 		}
 
-		dsn_map["secret_o"] = s
+		secret_o = s
 	}
 
-	u := IdSecretURI{
-		dsn_map: dsn_map,
+	id_u := IdSecretURI{
+		source:   source,
+		id:       id,
+		secret:   secret,
+		secret_o: secret_o,
 	}
 
-	return &u, nil
+	return &id_u, nil
 }
 
 func (u *IdSecretURI) URL() string {
-	url, _ := u.dsn_map["uri"]
-	return url
+	return u.id
 }
 
 func (u *IdSecretURI) String() string {
-	return u.dsn_map.String()
+
+	q := url.Values{}
+	q.Set("id", u.id)
+	q.Set("secret", u.secret)
+	q.Set("secret_o", u.secret_o)
+
+	return fmt.Sprintf("%s://%s?%s", IdSecretDriverName, u.source, q.Encode())
 }
