@@ -20,6 +20,6 @@ func main() {
 			log.Fatal(msg)
 		}
 
-		log.Printf("OK '%s' %s\n", u.String(), uri.Path(u))
+		log.Printf("OK '%s' %s %s\n", u.String(), u.Root(), u.Base())
 	}
 }
