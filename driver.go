@@ -18,7 +18,7 @@ type Driver interface {
 	NewURI(string) (URI, error)
 }
 
-func NewURI(str_uri string) (URI, error) {
+func NewURIWithDriver(str_uri string) (URI, error) {
 
 	driversMu.Lock()
 	defer driversMu.Unlock()
