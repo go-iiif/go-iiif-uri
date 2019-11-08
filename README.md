@@ -24,7 +24,59 @@ That's it, really. It is a tiny bit sad-making but also not really a big deal.
 
 [go-iiif-uri](https://github.com/go-iiif/go-iiif-uri) URI strings are still a work in progress. While they may still change a bit around the edges efforts will be made to ensure backwards compatibility going forward.
 
+Support for different [go-iiif-uri](https://github.com/go-iiif/go-iiif-uri) URIs is supported using `database/sql` -like "drivers" for packages that support the `URI` interface:
+
+```
+type URI interface {
+	Driver() string
+	String() string
+	Origin() string
+	Target(*url.Values) (string, error)
+}
+```
+
+## Drivers
+
+Drivers are expected to "register" themselves through the `driver.RegisterDriver` method at runtime. For example:
+
+```
+package custom
+
+import (
+	"github.com/go-iiif/go-iiif-uri/driver"
+)
+
+func init() {
+
+	dr, err := NewCustomURIDriver()
+
+	if err != nil {
+		panic(err)
+	}
+
+	driver.RegisterDriver("custom", dr)
+}
+```
+
+And then in your code you might do something like this:
+
+```
+import (
+	"github.com/go-iiif-uri"
+	_ "github.com/go-iiif-custom"
+)
+
+func main() {
+
+     u, _ := uri.NewURI("custom:///kitten.jpg")
+}
+```
+
+## Schemes
+
 `go-iiif-uri` URI strings are defined by a named scheme which indicates how an URI should be processed, a path which is a reference to an image and zero or more query parameters which are the specific instructions for processing the URI.
+
+The following schemes are registed by default when you import `go-iiif-uri`.
 
 ### file
 
