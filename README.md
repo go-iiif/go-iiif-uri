@@ -116,8 +116,11 @@ Valid parameters for the `idsecret://` URI scheme are:
 | original | string | no |
 | secret | string | no |
 | secret_o | string | no |
+| prefix | string | no |
 
 If either the `secret` or `secret_o` parameters are absent they will be auto-generated.
+
+The default prefix for `idsecret` URIs is to derive nested folders from the ID property. For example the default prefix for ID `34436377369` would be `344/363/773/69`. You can override this by specifying a `?prefix={CUSTOM_PREFIX}` in your `idsecret://` URI string.
 
 ### rewrite
 
