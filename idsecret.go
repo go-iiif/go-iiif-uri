@@ -109,7 +109,7 @@ func (u *IdSecretURI) Target(opts *url.Values) (string, error) {
 
 	str_id := u.id // strconv.FormatUint(u.id, 10)
 
-	prefix := id2Path(u.id)
+	prefix := Id2Path(u.id)
 
 	if u.prefix != "" {
 		prefix = u.prefix
@@ -164,7 +164,7 @@ func (u *IdSecretURI) Scheme() string {
 	return IDSECRET_SCHEME
 }
 
-func id2Path(id string) string {
+func Id2Path(id string) string {
 
 	parts := []string{""}
 	input := id // strconv.FormatUint(id, 10)

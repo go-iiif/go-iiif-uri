@@ -2,6 +2,12 @@
 
 Go package for working with URIs in the `go-iiif` package (and friends).
 
+## Documentation
+
+[![Go Reference](https://pkg.go.dev/badge/github.com/go-iiif/go-iiif-uri.svg)](https://pkg.go.dev/github.com/go-iiif/go-iiif-uri)
+
+Documentation is incomplete.
+
 ## Why does this package exist?
 
 This package exists because the `go-iiif:process` code demands a `URI` interface because sometimes URIs are more complicated than simple strings. By extension the code in the `go-iiif-aws` package, which handles invoking the `go-iiif:process` code as ECS or Lambda task _also_ needs to know about said `URI` interfaces.
@@ -18,6 +24,7 @@ Support for different [go-iiif-uri](https://github.com/go-iiif/go-iiif-uri) URIs
 
 ```
 type URI interface {
+	Scheme() string     
 	String() string
 	Origin() string
 	Target(*url.Values) (string, error)
