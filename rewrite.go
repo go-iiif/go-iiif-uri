@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+const REWRITE_SCHEME string = "rewrite"
+
 type RewriteURI struct {
 	URI
 	origin string
@@ -16,7 +18,7 @@ type RewriteURI struct {
 
 func init() {
 	ctx := context.Background()
-	RegisterURI(ctx, "rewrite", NewRewriteURI)
+	RegisterURI(ctx, REWRITE_SCHEME, NewRewriteURI)
 }
 
 func NewRewriteURI(ctx context.Context, str_uri string) (URI, error) {
@@ -68,4 +70,8 @@ func (u *RewriteURI) String() string {
 
 	raw_uri := fmt.Sprintf("%s?%s", u.origin, q.Encode())
 	return fmt.Sprintf("rewrite:///%s", raw_uri)
+}
+
+func (u *RewriteURI) Scheme() string {
+	return REWRITE_SCHEME
 }

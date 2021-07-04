@@ -11,6 +11,7 @@ import (
 )
 
 type URI interface {
+	Scheme() string
 	String() string
 	Origin() string
 	Target(*url.Values) (string, error)

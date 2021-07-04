@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-const IdSecretDriverName string = "idsecret"
+const IDSECRET_SCHEME string = "idsecret"
 
 type IdSecretURI struct {
 	URI
@@ -27,7 +27,7 @@ type IdSecretURI struct {
 
 func init() {
 	ctx := context.Background()
-	RegisterURI(ctx, "idsecret", NewIdSecretURI)
+	RegisterURI(ctx, IDSECRET_SCHEME, NewIdSecretURI)
 }
 
 func NewIdSecretURI(ctx context.Context, str_uri string) (URI, error) {
@@ -105,10 +105,6 @@ func NewIdSecretURI(ctx context.Context, str_uri string) (URI, error) {
 	return &id_u, nil
 }
 
-func (u *IdSecretURI) Driver() string {
-	return IdSecretDriverName
-}
-
 func (u *IdSecretURI) Target(opts *url.Values) (string, error) {
 
 	str_id := u.id // strconv.FormatUint(u.id, 10)
@@ -160,7 +156,12 @@ func (u *IdSecretURI) String() string {
 	q.Set("secret_o", u.secret_o)
 
 	raw_uri := fmt.Sprintf("%s?%s", u.origin, q.Encode())
-	return NewIdSecretURIString(raw_uri)
+
+	return fmt.Sprintf("%s:///%s", u.Scheme(), raw_uri)
+}
+
+func (u *IdSecretURI) Scheme() string {
+	return IDSECRET_SCHEME
 }
 
 func id2Path(id string) string {
@@ -180,8 +181,4 @@ func id2Path(id string) string {
 	}
 
 	return filepath.Join(parts...)
-}
-
-func NewIdSecretURIString(raw_uri string) string {
-	return fmt.Sprintf("%s:///%s", IdSecretDriverName, raw_uri)
 }

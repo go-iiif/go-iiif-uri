@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+const FILE_SCHEME string = "file"
+
 type FileURI struct {
 	URI
 	origin string
@@ -16,7 +18,7 @@ type FileURI struct {
 
 func init() {
 	ctx := context.Background()
-	RegisterURI(ctx, "file", NewFileURI)
+	RegisterURI(ctx, FILE_SCHEME, NewFileURI)
 }
 
 func NewFileURI(ctx context.Context, str_uri string) (URI, error) {
@@ -68,4 +70,8 @@ func (u *FileURI) String() string {
 	}
 
 	return fmt.Sprintf("file:///%s", raw_uri)
+}
+
+func (u *FileURI) Scheme() string {
+	return FILE_SCHEME
 }
