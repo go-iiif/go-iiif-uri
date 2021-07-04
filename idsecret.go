@@ -1,9 +1,9 @@
 package uri
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"github.com/aaronland/go-string/dsn"
 	"github.com/aaronland/go-string/random"
 	_ "log"
 	"net/url"
@@ -13,26 +13,6 @@ import (
 )
 
 const IdSecretDriverName string = "idsecret"
-
-func init() {
-	dr := NewIdSecretURIDriver()
-	RegisterDriver(IdSecretDriverName, dr)
-}
-
-type IdSecretURIDriver struct {
-	Driver
-}
-
-func NewIdSecretURIDriver() Driver {
-
-	dr := IdSecretURIDriver{}
-	return &dr
-}
-
-func (dr *IdSecretURIDriver) NewURI(str_uri string) (URI, error) {
-
-	return NewIdSecretURI(str_uri)
-}
 
 type IdSecretURI struct {
 	URI
@@ -45,39 +25,12 @@ type IdSecretURI struct {
 	prefix   string
 }
 
-func NewIdSecretURIFromDSN(dsn_raw string) (URI, error) {
-
-	dsn_map, err := dsn.StringToDSNWithKeys(dsn_raw, "id", "uri")
-
-	if err != nil {
-		return nil, err
-	}
-
-	origin := dsn_map["id"]
-	id := dsn_map["uri"]
-
-	q := url.Values{}
-	q.Set("id", id)
-
-	secret, ok := dsn_map["secret"]
-
-	if ok {
-		q.Set("secret", secret)
-	}
-
-	secret_o, ok := dsn_map["secret_o"]
-
-	if ok {
-		q.Set("secret_o", secret_o)
-	}
-
-	raw_uri := fmt.Sprintf("%s?%s", origin, q.Encode())
-	str_uri := NewIdSecretURIString(raw_uri)
-
-	return NewIdSecretURI(str_uri)
+func init() {
+	ctx := context.Background()
+	RegisterURI(ctx, "idsecret", NewIdSecretURI)
 }
 
-func NewIdSecretURI(str_uri string) (URI, error) {
+func NewIdSecretURI(ctx context.Context, str_uri string) (URI, error) {
 
 	u, err := url.Parse(str_uri)
 

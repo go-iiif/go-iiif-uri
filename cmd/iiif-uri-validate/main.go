@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"github.com/go-iiif/go-iiif-uri"
@@ -11,9 +12,11 @@ func main() {
 
 	flag.Parse()
 
+	ctx := context.Background()
+
 	for _, str_uri := range flag.Args() {
 
-		u, err := uri.NewURI(str_uri)
+		u, err := uri.NewURI(ctx, str_uri)
 
 		if err != nil {
 			msg := fmt.Sprintf("Invalid URI (%s) %s", str_uri, err)
