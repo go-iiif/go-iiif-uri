@@ -2,17 +2,17 @@ package uri
 
 import (
 	"context"
-	"testing"
-	"net/url"
-	"regexp"
-	"path/filepath"
 	"fmt"
+	"net/url"
+	"path/filepath"
+	"regexp"
+	"testing"
 )
 
 func TestIdSecretURI(t *testing.T) {
 
 	ctx := context.Background()
-	
+
 	candidates := []string{
 		"idsecret:///tmp/example.jpg?id=1234",
 	}
@@ -33,9 +33,9 @@ func TestIdSecretURI(t *testing.T) {
 
 		net_q := net_u.Query()
 
-		id := net_q.Get("id")		
+		id := net_q.Get("id")
 		secret := net_q.Get("secret")
-		secret_o := net_q.Get("secret_o")		
+		secret_o := net_q.Get("secret_o")
 
 		if id != "1234" {
 			t.Fatalf("Unexpected id value for '1234': '%s'", id)
@@ -51,10 +51,10 @@ func TestIdSecretURI(t *testing.T) {
 
 		format := "jpg"
 		label := "x"
-		
+
 		values := &url.Values{}
 		values.Set("format", format)
-		values.Set("label", label)		
+		values.Set("label", label)
 		target, err := u.Target(values)
 
 		if err != nil {
@@ -65,22 +65,22 @@ func TestIdSecretURI(t *testing.T) {
 
 		root := filepath.Dir(target)
 		fname := filepath.Base(target)
-		
+
 		if root != tree {
 			t.Fatalf("Unexpected root: '%s'", root)
 		}
-		
+
 		fname_pat := fmt.Sprintf("%s_([^_]+)_%s.%s", id, label, format)
 		fname_re, err := regexp.Compile(fname_pat)
 
 		if err != nil {
 			t.Fatalf("Failed to compile fname pattern, %v", err)
 		}
-		
-		if !fname_re.MatchString(fname){
+
+		if !fname_re.MatchString(fname) {
 			t.Fatalf("Filename failed pattern match: '%s'", fname)
 		}
-		
+
 	}
-	
+
 }

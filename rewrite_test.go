@@ -8,7 +8,7 @@ import (
 func TestRewriteURI(t *testing.T) {
 
 	ctx := context.Background()
-	
+
 	candidates := []string{
 		"rewrite:///tmp/bob.jpg?target=alice.jpg",
 	}
@@ -35,5 +35,5 @@ func TestRewriteURI(t *testing.T) {
 			t.Fatalf("Unexpected target for '%s': '%s'", str_uri, target)
 		}
 	}
-	
+
 }

@@ -8,9 +8,10 @@ import (
 func TestFileURI(t *testing.T) {
 
 	ctx := context.Background()
-	
+
 	candidates := []string{
 		"/tmp/example.jpg",
+		"tmp/example.jpg",		
 		"file:///tmp/example.jpg",
 	}
 
@@ -36,5 +37,5 @@ func TestFileURI(t *testing.T) {
 			t.Fatalf("Unexpected target for '%s': '%s'", str_uri, target)
 		}
 	}
-	
+
 }

@@ -8,12 +8,12 @@ import (
 func TestNewURI(t *testing.T) {
 
 	ctx := context.Background()
-	
+
 	candidates := []string{
 		"/tmp/example.jpg",
 		"file:///tmp/example.jpg",
 		"idsecret:///tmp/example.jpg?id=1234",
-		"rewrite:///tmp/example.jpg?target=bob.jpg",	
+		"rewrite:///tmp/example.jpg?target=bob.jpg",
 	}
 
 	for _, str_uri := range candidates {
