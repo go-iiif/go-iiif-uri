@@ -2,6 +2,7 @@ package uri
 
 import (
 	"context"
+	"fmt"
 	"testing"
 )
 
@@ -9,22 +10,19 @@ func TestFileURI(t *testing.T) {
 
 	ctx := context.Background()
 
-	candidates := []string{
-		"/tmp/example.jpg",
-		"tmp/example.jpg",		
-		"file:///tmp/example.jpg",
+	candidates := map[string]string{
+		"/tmp/example.jpg":        "tmp/example.jpg",
+		"tmp/example.jpg":         "tmp/example.jpg",
+		"file:///tmp/example.jpg": "tmp/example.jpg",
+		"file:///1746308155_248479.tif?target=174/630/815/5/tiles": "174/630/815/5/tiles",
 	}
 
-	for _, str_uri := range candidates {
+	for str_uri, expected := range candidates {
 
 		u, err := NewURI(ctx, str_uri)
 
 		if err != nil {
 			t.Fatalf("Failed to create new IIIF URI for '%s', %v", str_uri, err)
-		}
-
-		if u.String() != "file:///tmp/example.jpg" {
-			t.Fatalf("Unexpected string value for '%s': '%s'", str_uri, u.String())
 		}
 
 		target, err := u.Target(nil)
@@ -33,8 +31,8 @@ func TestFileURI(t *testing.T) {
 			t.Fatalf("Unable to determine target for '%s', %v", str_uri, err)
 		}
 
-		if target != "tmp/example.jpg" {
-			t.Fatalf("Unexpected target for '%s': '%s'", str_uri, target)
+		if target != expected {
+			fmt.Printf("Unexpected target for '%s': target is: '%s' expected: '%s'\n", str_uri, target, expected)
 		}
 	}
 
